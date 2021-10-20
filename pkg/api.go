@@ -11,21 +11,23 @@ import (
 )
 
 type Api struct {
-	token  string
-	client http.Client
+	username string
+	token    string
+	client   http.Client
 }
 
-func NewApi(token string) (*Api, error) {
+func NewApi(username, token string) (*Api, error) {
 	var instance *Api = new(Api)
 
 	if len(token) == 0 {
 		return nil, errors.New("missing API token")
 	}
 
+	instance.username = username
 	instance.token = token
 
 	client := http.Client{
-		Timeout: time.Duration(1) * time.Second,
+		Timeout: time.Duration(10) * time.Second,
 	}
 
 	instance.client = client
@@ -89,18 +91,14 @@ func (api *Api) GetUserStarts(user string, page int) (GitHubRepositories, error)
 
 func (api *Api) DeleteStarredRpository(user string, starredRepository *GitHubRepository) error {
 	log.Printf("Removing start for: %s\n", starredRepository.Name)
-	url := fmt.Sprintf("https://api.github.com/user/starred/%s", starredRepository.FullName)
+	url := fmt.Sprintf("https://api.github.com/user/starred/%s/%s", starredRepository.Owner.Login, starredRepository.Name)
 	req, err := http.NewRequest("DELETE", url, nil)
 
 	if err != nil {
 		return err
 	}
 
-	var header http.Header = map[string][]string{
-		"Authorization": {fmt.Sprintf("token %s", api.token)},
-	}
-
-	req.Header = header
+	req.SetBasicAuth(api.username, api.token)
 	res, err := api.client.Do(req)
 
 	if err != nil {

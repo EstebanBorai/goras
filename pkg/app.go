@@ -23,7 +23,7 @@ func NewApp(options Options) *App {
 		panic(err)
 	}
 
-	api, createApiError := NewApi(options.Token)
+	api, createApiError := NewApi(options.Username, options.Token)
 
 	if createApiError != nil {
 		panic(createApiError)
@@ -86,6 +86,7 @@ func (app *App) fetchStarredRepos() (*GitHubRepositories, error) {
 }
 
 func (app *App) deleteStarredRepositories(starredRepositories *GitHubRepositories) error {
+	fmt.Printf("%d\n\n", len(*starredRepositories))
 	for _, el := range *starredRepositories {
 		if err := app.api.DeleteStarredRpository(app.options.Username, &el); err != nil {
 			return err

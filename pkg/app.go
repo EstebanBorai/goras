@@ -42,6 +42,8 @@ func (app *App) Start() error {
 		return getUserStartsErr
 	}
 
+	fmt.Printf("Found %d starred repositories.\n", len(*starredRepositories))
+
 	deleteStarredRepositoriesErr := app.deleteStarredRepositories(starredRepositories)
 
 	if deleteStarredRepositoriesErr != nil {
@@ -73,9 +75,7 @@ func (app *App) fetchStarredRepos() (*GitHubRepositories, error) {
 
 		app.statistics.totalStarredRepositories += repositoryCount
 
-		for _, el := range gitHubStarredRepos {
-			starredRepositories = append(gitHubStarredRepos, el)
-		}
+		starredRepositories = append(starredRepositories, gitHubStarredRepos...)
 
 		loopIteration++
 	}
